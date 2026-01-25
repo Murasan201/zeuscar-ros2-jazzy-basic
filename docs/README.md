@@ -24,6 +24,11 @@
 |-------------|------|---------|
 | [backlog-raspberry-pi.md](backlog-raspberry-pi.md) | Raspberry Piバックログ | ROS2、パッケージ移行 |
 
+### 開発記録
+| ドキュメント | 説明 |
+|-------------|------|
+| [journal.md](journal.md) | 開発ジャーナル |
+
 ---
 
 ## ドキュメント命名規則
@@ -35,6 +40,7 @@
 | ガイド | *-guide.md | setup-guide.md |
 | バックログ | backlog-*.md | backlog-raspberry-pi.md |
 | トラブルシューティング | troubleshooting.md | - |
+| ジャーナル | journal.md | - |
 
 ---
 
@@ -43,3 +49,4 @@
 | 日付 | 内容 |
 |------|------|
 | 2026-01-25 | 初版作成 |
+| 2026-01-25 | journal.md追加 |
