@@ -17,7 +17,75 @@ Ubuntu 24.04 LTS + ROS2 Jazzy環境の標準セットアップ手順書として
 ## 1. OSのインストール
 
 ### 1.1 Ubuntu 24.04のインストール
-（手順を記載予定）
+
+#### 1.1.1 対象ハードウェア
+- Raspberry Pi 4 Model B
+
+#### 1.1.2 OSイメージのダウンロード
+Ubuntu公式サイトからRaspberry Pi用のUbuntu 24.04 LTS (Noble Numbat) Server imageをダウンロードする。
+
+- URL: https://ubuntu.com/download/raspberry-pi
+
+#### 1.1.3 OSイメージの書き込み
+Raspberry Pi Imagerを使用してmicroSDカードにイメージを書き込む。
+
+#### 1.1.4 インストール確認
+```bash
+# OS情報の確認
+cat /etc/os-release
+
+# 期待される出力
+# PRETTY_NAME="Ubuntu 24.04 LTS"
+# VERSION="24.04 LTS (Noble Numbat)"
+# VERSION_CODENAME=noble
+```
+
+```bash
+# カーネル情報の確認
+uname -a
+
+# 期待される出力例
+# Linux pi4-ros2-basic 6.8.0-1031-raspi ... aarch64 GNU/Linux
+```
+
+```bash
+# Raspberry Piモデルの確認
+cat /proc/device-tree/model
+
+# 期待される出力例
+# Raspberry Pi 4 Model B Rev 1.5
+```
+
+### 1.2 システムアップデート
+
+システムを最新の状態に更新する。
+
+```bash
+# パッケージリストの更新
+sudo apt-get update
+
+# パッケージのアップグレード
+sudo apt-get upgrade -y
+```
+
+### 1.3 必要なシステムパッケージのインストール
+
+開発に必要な基本パッケージをインストールする。
+
+```bash
+# 基本開発ツール
+sudo apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    curl \
+    vim \
+    python3-pip
+
+# ソフトウェアプロパティ（リポジトリ追加用）
+sudo apt-get install -y software-properties-common
+```
 
 ---
 
@@ -94,3 +162,4 @@ Ubuntu 24.04 LTS + ROS2 Jazzy環境の標準セットアップ手順書として
 | 日付 | 内容 |
 |------|------|
 | 2026-01-25 | 初版作成（テンプレート） |
+| 2026-01-25 | 1.1〜1.3 OS環境セットアップ手順を追加 |
