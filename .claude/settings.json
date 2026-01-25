@@ -1,0 +1,24 @@
+{
+  "allowedTools": [
+    "Write",
+    "Edit",
+    "Read",
+    "Bash(git add *)",
+    "Bash(git commit *)",
+    "Bash(git status *)",
+    "Bash(git diff *)",
+    "Bash(python *)",
+    "Bash(pip *)",
+    "Bash(gcc *)",
+    "Bash(g++ *)",
+    "Bash(make *)",
+    "Bash(cmake *)",
+    "Bash(mkdir *)",
+    "Bash(ls *)",
+    "Bash(cat *)",
+    "Bash(sudo apt-get *)",
+    "WebSearch",
+    "WebFetch",
+    "mcp__*"
+  ]
+}
