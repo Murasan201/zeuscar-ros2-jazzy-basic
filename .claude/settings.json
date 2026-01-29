@@ -16,13 +16,6 @@
     "Bash(mkdir *)",
     "Bash(ls *)",
     "Bash(cat *)",
-    "Bash(echo *)",
-    "Bash(sudo apt-get update)",
-    "Bash(sudo apt-get upgrade *)",
-    "Bash(sudo apt-get install *)",
-    "Bash(sudo apt-get *)",
-    "WebSearch",
-    "WebFetch",
-    "mcp__*"
+    "Bash(sudo apt-get *)"
   ]
 }
