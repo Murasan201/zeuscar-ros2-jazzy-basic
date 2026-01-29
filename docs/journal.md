@@ -202,6 +202,15 @@ src/
 └── zeuscar_robot_package/  （Subscriberノード - PC側からのコマンドをArduinoに転送）
 ```
 
+#### ホストPC用セットアップガイドの作成
+- [x] docs/setup-guide-host-pc.md を新規作成
+  - SSDへのUbuntu 24.04インストール手順
+  - BIOS/UEFI設定（セキュアブート、ブート順序）
+  - インストールUSB作成方法（Windows/Linux/macOS対応）
+  - 初回起動と初期設定
+  - トラブルシューティング
+- [x] docs/README.md（索引）を更新
+
 ---
 
 ## 次回作業開始時にやること

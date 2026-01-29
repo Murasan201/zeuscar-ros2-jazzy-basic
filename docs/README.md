@@ -14,10 +14,11 @@
 | [system-specification.md](system-specification.md) | システム仕様書 |
 
 ### セットアップ・運用
-| ドキュメント | 説明 |
-|-------------|------|
-| [setup-guide.md](setup-guide.md) | セットアップガイド |
-| [troubleshooting.md](troubleshooting.md) | トラブルシューティング |
+| ドキュメント | 説明 | 対象 |
+|-------------|------|------|
+| [setup-guide.md](setup-guide.md) | セットアップガイド | Raspberry Pi |
+| [setup-guide-host-pc.md](setup-guide-host-pc.md) | セットアップガイド | ホストPC |
+| [troubleshooting.md](troubleshooting.md) | トラブルシューティング | 共通 |
 
 ### バックログ
 | ドキュメント | 説明 | 担当範囲 |
@@ -50,3 +51,4 @@
 |------|------|
 | 2026-01-25 | 初版作成 |
 | 2026-01-25 | journal.md追加 |
+| 2026-01-29 | setup-guide-host-pc.md追加 |
