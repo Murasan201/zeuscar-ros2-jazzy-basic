@@ -509,6 +509,83 @@ Intel NUCには有線LANポートがあり、有線接続では省電力によ�
 
 ---
 
+### HOST-009: apt/dpkgのロックエラー（unattended-upgrades）
+
+#### 発生日時
+2026-01-31
+
+#### エラー内容
+```
+Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 7715 (unattended-upgr)
+```
+
+このメッセージが繰り返し表示され、`apt install` が実行できない。
+
+#### 発生状況
+- Ubuntu 24.04でパッケージをインストールしようとした際に発生
+- `sudo apt install curl` など任意のパッケージインストール時
+- 特にOS初回起動後やしばらく放置した後に発生しやすい
+
+#### 原因
+**unattended-upgrades**（自動セキュリティアップデート）がバックグラウンドで実行中。
+
+Ubuntuはデフォルトでセキュリティアップデートを自動的にダウンロード・インストールする設定になっている。この処理中はdpkg/aptのロックが取られるため、他のパッケージ操作ができない。
+
+#### 解決方法
+
+**方法1: 待つ（推奨）**
+
+自動アップデートが完了するまで待つ。通常5〜15分程度で完了する。
+
+進捗を確認:
+```bash
+ps aux | grep unattended
+```
+
+プロセスが表示されなくなれば完了。
+
+**方法2: プロセスを強制終了（急ぎの場合）**
+
+```bash
+# unattended-upgradesサービスを停止
+sudo systemctl stop unattended-upgrades
+
+# プロセスを強制終了（PIDはエラーメッセージに表示された番号）
+sudo kill 7715
+
+# ロックファイルを削除
+sudo rm -f /var/lib/dpkg/lock-frontend
+sudo rm -f /var/lib/dpkg/lock
+sudo rm -f /var/lib/apt/lists/lock
+sudo rm -f /var/cache/apt/archives/lock
+
+# dpkgを修復
+sudo dpkg --configure -a
+```
+
+その後、再度パッケージをインストール:
+```bash
+sudo apt install -y curl
+```
+
+**方法3: 自動アップデートを無効化（開発環境向け）**
+
+頻繁に発生する場合、自動アップデートを無効化することも可能:
+
+```bash
+# 自動アップデートを無効化
+sudo systemctl disable unattended-upgrades
+sudo systemctl stop unattended-upgrades
+```
+
+> **Warning**: セキュリティアップデートが自動適用されなくなるため、
+> 定期的に手動で `sudo apt update && sudo apt upgrade` を実行すること。
+
+#### ステータス
+**解決済み** - 待機または強制終了で対応可能
+
+---
+
 ## エラー記載テンプレート
 
 ```markdown
@@ -544,6 +621,7 @@ YYYY-MM-DD
 
 | 日付 | 内容 |
 |------|------|
+| 2026-01-31 | HOST-009: apt/dpkgロックエラー（unattended-upgrades）を追加 |
 | 2026-01-31 | HOST-008: Wi-Fi接続でSSHが断続的に切断される問題を追加（解決済み） |
 | 2026-01-30 | 初版作成 |
 | 2026-01-30 | HOST-001: BIOS/Legacy Boot of UEFI-only mediaエラーを追加 |
