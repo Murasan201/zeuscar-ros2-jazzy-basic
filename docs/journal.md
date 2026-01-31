@@ -213,6 +213,71 @@ src/
 
 ---
 
+## 2026-01-30
+
+### 作業内容
+
+#### ホストPC（Intel NUC）へのUbuntu 24.04インストール
+
+本プロジェクトのホストPC（操作側）のセットアップを開始。
+
+**ホストPCスペック:**
+| 項目 | 内容 |
+|------|------|
+| PC種別 | Intel NUC |
+| CPU | Intel Core i7-1255U (12th Gen) |
+| メモリ | 8GB |
+| 内蔵SSD | WD Blue SN570 1TB NVMe |
+| 元OS | Windows 11 + WSL2 (Ubuntu 22.04) |
+
+**インストール方法:**
+- USB SSDをインストールメディアとして使用
+- Rufusで Ubuntu 24.04 ISOを書き込み（GPT、UEFI）
+- 内蔵SSDにクリーンインストール
+
+#### 発生したトラブルと解決
+
+| ID | 問題 | 解決 |
+|----|------|------|
+| HOST-001 | BIOS/LEGACY BOOT OF UEFI-ONLY MEDIA エラー | ブートメニューで「UEFI:」付きデバイスを選択 |
+| HOST-002 | Intel NUC Visual BIOSの操作 | Boot Configuration設定を文書化 |
+| HOST-003 | インストール後に再びインストールメニュー表示 | USB抜いて再起動 |
+| HOST-004 | ネットワーク接続が切れる | ケーブル抜き差しで復旧 |
+| HOST-005 | SSH接続タイムアウト | スリープモードを解除 |
+| HOST-006 | SSHホストキー変更エラー | known_hostsから古いキーを削除 |
+| HOST-007 | CursorリモートSSHでサーバーダウンロード失敗 | **未解決**（SSL接続エラー） |
+
+#### Ubuntuインストール完了後の設定
+- [x] SSHサーバーのインストールと有効化
+- [x] SSH接続テスト成功（コマンドラインから）
+- [ ] スリープ無効化（推奨）- 未実施
+- [ ] CursorリモートSSH接続 - SSL接続エラーで未解決
+
+#### ドキュメント更新
+- [x] setup-guide-host-pc.md 大幅更新
+  - Intel NUCスペック情報追加
+  - Intel NUC Visual BIOSの詳細設定手順
+  - Ubuntu 24.04新インストーラー（Flutter版）の手順
+  - GNU GRUBブートメニューの説明
+  - ユーザーアカウント設定の詳細解説
+  - SSHサーバー設定の詳細手順
+  - スリープ無効化の設定手順
+- [x] troubleshooting-host-pc.md 新規作成
+  - HOST-001〜HOST-007を記録
+
+### 現在の状態
+- Ubuntu 24.04インストール完了
+- SSH接続可能（コマンドラインから）
+- CursorリモートSSHは未解決（次回対応）
+
+### 次回やること
+1. SSL接続エラーの解決（ca-certificates確認）
+2. CursorリモートSSH接続の確認
+3. スリープ無効化の実施
+4. ROS2 Jazzyのインストール（ホストPC）
+
+---
+
 ## 次回作業開始時にやること
 
 ### 1. ROS2環境の確認

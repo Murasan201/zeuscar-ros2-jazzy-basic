@@ -188,7 +188,57 @@ touch reference/COLCON_IGNORE
 
 ## ハードウェアエラー
 
-（エラー発生時に記載）
+### HW-001: BIOS/LEGACY BOOT OF UEFI-ONLY MEDIA エラー
+
+#### 発生日時
+2026-01-30
+
+#### エラー内容
+```
+ERROR: BIOS/LEGACY BOOT OF UEFI-ONLY MEDIA
+
+This drive was created by Rufus [https://rufus.ie].
+It can boot in UEFI mode only but you are trying to
+boot it in BIOS/Legacy mode. THIS WILL NOT WORK!
+```
+
+#### 発生状況
+Intel NUCでRufusで作成したUbuntu 24.04インストールUSB（SSD）から起動しようとした際に発生。
+ブートメニュー（F10）からUSBデバイスを選択して起動を試みた。
+
+#### 原因
+RufusでUSBメディアを作成する際に以下の設定を使用した:
+- パーティション構成: GPT
+- ターゲットシステム: UEFI（非CSM）
+
+この設定で作成されたUSBはUEFIモード専用だが、Intel NUCがLegacyモードでUSBを起動しようとしたため、互換性エラーが発生した。
+
+#### 解決方法
+
+**方法1: BIOS設定でUEFIモードを有効にする（推奨）**
+
+1. NUCの電源を入れ、すぐに **F2** を連打してBIOS設定に入る
+2. **Boot** タブを開く
+3. 以下の設定を変更:
+   - **UEFI Boot** → **Enabled**
+   - **Legacy Boot** → **Disabled**（または優先度を下げる）
+   - **Secure Boot** → **Disabled**（Ubuntuインストール用）
+4. **F10** を押して保存・再起動
+5. 起動時に **F10** でブートメニューを表示
+6. **UEFI: [USB SSD名]** を選択（Legacyではなく**UEFI**プレフィックス付きを選ぶ）
+
+**方法2: RufusでLegacy対応USBを再作成**
+
+Rufusで以下の設定でUSBを再作成:
+- パーティション構成: **MBR**
+- ターゲットシステム: **BIOS（またはUEFI-CSM）**
+
+> **Note**: 方法1を推奨。現代のPCはUEFIモードでインストールする方が望ましい。
+
+#### 参考情報
+- Intel NUCのBIOS設定キー: F2
+- Intel NUCのブートメニューキー: F10
+- ブートメニューに「UEFI: デバイス名」と「デバイス名」の両方が表示される場合、UEFI付きを選択する
 
 ---
 
@@ -226,3 +276,4 @@ YYYY-MM-DD
 | 2026-01-28 | ENV-001: ROS2リポジトリ追加時のファイル空問題を追加 |
 | 2026-01-28 | ENV-002: dpkgロックエラー（unattended-upgrades）を追加 |
 | 2026-01-29 | BUILD-001: colconで重複パッケージ名エラーを追加 |
+| 2026-01-30 | HW-001: BIOS/Legacy Boot of UEFI-only mediaエラーを追加 |

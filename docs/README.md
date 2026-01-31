@@ -18,7 +18,8 @@
 |-------------|------|------|
 | [setup-guide.md](setup-guide.md) | セットアップガイド | Raspberry Pi |
 | [setup-guide-host-pc.md](setup-guide-host-pc.md) | セットアップガイド | ホストPC |
-| [troubleshooting.md](troubleshooting.md) | トラブルシューティング | 共通 |
+| [troubleshooting.md](troubleshooting.md) | トラブルシューティング | Raspberry Pi |
+| [troubleshooting-host-pc.md](troubleshooting-host-pc.md) | トラブルシューティング | ホストPC |
 
 ### バックログ
 | ドキュメント | 説明 | 担当範囲 |
@@ -53,3 +54,5 @@
 | 2026-01-25 | journal.md追加 |
 | 2026-01-29 | setup-guide-host-pc.md追加 |
 | 2026-01-30 | プロジェクトルートにREADME.md追加（英語） |
+| 2026-01-30 | setup-guide-host-pc.md更新（ホストPCスペック情報、USB SSD使用方法） |
+| 2026-01-30 | troubleshooting-host-pc.md新規作成（ホストPC用トラブルシューティング） |
