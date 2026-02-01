@@ -586,6 +586,92 @@ sudo systemctl stop unattended-upgrades
 
 ---
 
+## ROS2ビルドエラー
+
+### HOST-010: colcon build で「Duplicate package names not supported」エラー
+
+#### 発生日時
+2026-02-01
+
+#### 発生環境
+- PC: Intel NUC
+- OS: Ubuntu 24.04 LTS
+- ROS2: Jazzy Jalisco
+- ビルドツール: colcon
+
+#### エラー内容
+```
+[0.846s] ERROR:colcon:colcon build: Duplicate package names not supported:
+- zeuscar_robot_package:
+  - reference/zeuscar-project/pc_control/src/zeuscar_robot_package
+  - reference/zeuscar-project/ros2/src/zeuscar_robot_package
+  - src/zeuscar_robot_package
+```
+
+#### 発生状況
+- プロジェクトルートで `colcon build --packages-select zeuscar_robot_package` を実行
+- referenceディレクトリ内に同名のパッケージが複数存在していた
+- colconがワークスペース全体をスキャンして重複を検出
+
+#### 原因
+colconはデフォルトでワークスペース内の全ディレクトリを再帰的にスキャンしてROS2パッケージを検索する。
+`reference/`ディレクトリ内にも同名のパッケージ（`zeuscar_robot_package`）が存在したため、
+重複パッケージとしてエラーになった。
+
+プロジェクト構造:
+```
+zeuscar-ros2-jazzy-basic/
+├── src/zeuscar_robot_package/              ← 開発中のパッケージ
+└── reference/zeuscar-project/
+    ├── pc_control/src/zeuscar_robot_package/   ← 参照用（重複）
+    └── ros2/src/zeuscar_robot_package/         ← 参照用（重複）
+```
+
+#### 解決方法
+
+**COLCON_IGNOREファイルを追加してディレクトリを除外する**
+
+除外したいディレクトリに`COLCON_IGNORE`という空ファイルを作成すると、
+colconはそのディレクトリ以下をスキャン対象から除外する。
+
+```bash
+# referenceディレクトリを除外
+touch reference/COLCON_IGNORE
+```
+
+その後、再度ビルドを実行:
+```bash
+colcon build --packages-select zeuscar_robot_package
+```
+
+出力:
+```
+Starting >>> zeuscar_robot_package
+Finished <<< zeuscar_robot_package [3.81s]
+
+Summary: 1 package finished [4.11s]
+```
+
+#### 補足情報
+
+**COLCON_IGNOREの仕組み**
+- `COLCON_IGNORE`ファイルが存在するディレクトリは、colconのパッケージ検索から除外される
+- ファイルの内容は空でよい（ファイルの存在自体が除外フラグ）
+- サブディレクトリも含めて除外される
+
+**代替方法: --paths オプション**
+特定のディレクトリのみをスキャン対象にする方法もある:
+```bash
+colcon build --paths src/
+```
+
+ただし、COLCON_IGNOREの方がプロジェクト設定として永続化されるため推奨。
+
+#### ステータス
+**解決済み** - COLCON_IGNOREファイルで除外
+
+---
+
 ## エラー記載テンプレート
 
 ```markdown
@@ -621,6 +707,7 @@ YYYY-MM-DD
 
 | 日付 | 内容 |
 |------|------|
+| 2026-02-01 | HOST-010: colcon build重複パッケージ名エラーを追加（解決済み） |
 | 2026-01-31 | HOST-009: apt/dpkgロックエラー（unattended-upgrades）を追加 |
 | 2026-01-31 | HOST-008: Wi-Fi接続でSSHが断続的に切断される問題を追加（解決済み） |
 | 2026-01-30 | 初版作成 |

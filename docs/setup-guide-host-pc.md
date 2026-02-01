@@ -875,17 +875,725 @@ nmcli connection show "接続名" | grep powersave
 
 ---
 
-## 次のステップ
+## 6. 開発環境のセットアップ
 
-Ubuntuのインストールが完了したら、以下のセットアップに進む:
+Ubuntuインストール後、ROS2開発に必要な基本ツールをインストールする。
 
-1. **開発環境のセットアップ** - Git, Python, C++等
-2. **ROS2 Jazzyのインストール** - セットアップガイド（setup-guide.md）のセクション2を参照
-3. **Publisherパッケージの作成** - PC側の制御ノード
+### 6.1 必要なシステムパッケージのインストール
 
-> **Note**: ROS2のインストール手順はRaspberry Pi用セットアップガイド（setup-guide.md）の
-> セクション2「ROS2 Jazzyのインストール」とほぼ同じ手順で実行できる。
-> ただし、アーキテクチャがamd64である点のみ異なる。
+```bash
+# パッケージリストの更新
+sudo apt-get update
+
+# 基本開発ツール
+sudo apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    curl \
+    vim \
+    python3-pip
+
+# ソフトウェアプロパティ（リポジトリ追加用）
+sudo apt-get install -y software-properties-common
+```
+
+### 6.2 Gitのセットアップ
+
+#### 6.2.1 Gitのインストール確認
+
+```bash
+# Gitバージョンの確認
+git --version
+
+# 期待される出力例
+# git version 2.43.0
+```
+
+#### 6.2.2 Gitユーザー情報の設定
+
+コミット時に使用するユーザー名とメールアドレスを設定する。
+
+```bash
+# ユーザー名の設定
+git config --global user.name "Your Name"
+
+# メールアドレスの設定
+git config --global user.email "your.email@example.com"
+
+# 設定の確認
+git config --global --list
+```
+
+#### 6.2.3 デフォルトブランチ名の設定（任意）
+
+```bash
+# デフォルトブランチ名をmainに設定
+git config --global init.defaultBranch main
+```
+
+### 6.3 Python開発環境の確認
+
+#### 6.3.1 Pythonバージョンの確認
+
+```bash
+# Python3バージョンの確認
+python3 --version
+
+# 期待される出力例
+# Python 3.12.3
+```
+
+#### 6.3.2 pipバージョンの確認
+
+```bash
+# pip3バージョンの確認
+pip3 --version
+
+# 期待される出力例
+# pip 24.0 from /usr/lib/python3/dist-packages/pip (python 3.12)
+```
+
+#### 6.3.3 Python開発パッケージの確認
+
+```bash
+# python3-devパッケージの確認
+dpkg -l | grep python3-dev
+
+# インストールされていない場合はインストール
+sudo apt-get install -y python3-dev
+```
+
+### 6.4 C++開発環境の確認
+
+#### 6.4.1 GCCバージョンの確認
+
+```bash
+# gccバージョンの確認
+gcc --version
+
+# 期待される出力例
+# gcc (Ubuntu 13.2.0-23ubuntu4) 13.2.0
+```
+
+#### 6.4.2 G++バージョンの確認
+
+```bash
+# g++バージョンの確認
+g++ --version
+
+# 期待される出力例
+# g++ (Ubuntu 13.2.0-23ubuntu4) 13.2.0
+```
+
+#### 6.4.3 CMakeバージョンの確認
+
+```bash
+# cmakeバージョンの確認
+cmake --version
+
+# 期待される出力例
+# cmake version 3.28.3
+```
+
+---
+
+## 7. ROS2 Jazzyのインストール
+
+ROS2 Jazzy JaliscoはUbuntu 24.04 LTS向けのROS2ディストリビューションである。
+
+公式ドキュメント: https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html
+
+### 7.1 ロケール設定
+
+ROS2はUTF-8ロケールを必要とする。
+
+```bash
+# 現在のロケール確認
+locale
+```
+
+> **Note**: `LANG=C.UTF-8`または`LANG=en_US.UTF-8`のように、UTF-8が含まれていれば問題ない。
+
+UTF-8ロケールが設定されていない場合のみ以下を実行:
+
+```bash
+sudo apt-get update && sudo apt-get install -y locales
+sudo locale-gen en_US en_US.UTF-8
+sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
+
+# 設定確認
+locale
+```
+
+### 7.2 リポジトリの追加
+
+ROS2パッケージをインストールするために、ROS2のaptリポジトリを追加する。
+
+#### 7.2.1 Universeリポジトリの有効化
+
+```bash
+# Universeリポジトリを有効化
+sudo add-apt-repository universe
+```
+
+#### 7.2.2 ROS2 GPGキーの追加
+
+```bash
+# 必要なツールのインストール
+sudo apt-get update && sudo apt-get install -y curl
+
+# ROS2 GPGキーをダウンロードして追加
+sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+```
+
+#### 7.2.3 ROS2リポジトリの追加
+
+```bash
+# リポジトリをソースリストに追加
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+```
+
+> **Note**: ホストPC（x86_64）では `arch=amd64` が自動的に設定される。
+> Raspberry Pi（ARM64）では `arch=arm64` となる。
+
+リポジトリが正しく追加されたことを確認:
+
+```bash
+cat /etc/apt/sources.list.d/ros2.list
+
+# 期待される出力（ホストPCの場合）
+# deb [arch=amd64 signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu noble main
+```
+
+#### 7.2.4 パッケージリストの更新
+
+```bash
+# aptパッケージリストを更新
+sudo apt-get update
+
+# システムパッケージを最新に（ROS2インストール前に推奨）
+sudo apt-get upgrade -y
+```
+
+### 7.3 ROS2パッケージのインストール
+
+#### 7.3.1 ROS2 Desktopのインストール
+
+Desktop版には、ROS2コアに加えて可視化ツール（RViz2）やデモパッケージが含まれる。
+
+```bash
+# ROS2 Jazzy Desktop版のインストール
+sudo apt-get install -y ros-jazzy-desktop
+```
+
+> **Note**: インストールには時間がかかる（数分〜十数分程度）。
+> 依存パッケージも含めて約2GB程度のダウンロードとなる。
+
+> **Troubleshooting**: `Could not get lock /var/lib/dpkg/lock-frontend`エラーが発生した場合は、
+> `unattended-upgrades`（自動セキュリティアップデート）が実行中の可能性がある。
+> 完了を待つか、`sudo systemctl stop unattended-upgrades`で一時停止する。
+> 詳細は[トラブルシューティング HOST-009](troubleshooting-host-pc.md#host-009-aptdpkgのロックエラーunattended-upgrades)を参照。
+
+#### 7.3.2 開発ツールのインストール
+
+ROS2パッケージのビルドに必要な開発ツールをインストールする。
+
+```bash
+# ROS2開発ツールのインストール
+sudo apt-get install -y ros-dev-tools
+```
+
+> **Note**: `ros-dev-tools`には以下のツールが含まれる:
+> - `rosdep`: ROS2パッケージの依存関係を自動解決
+> - `vcstool`: バージョン管理システムツール
+> - `colcon`: ROS2ビルドツール
+> - その他のROS2開発用ユーティリティ
+
+### 7.4 環境設定
+
+#### 7.4.1 ROS2環境のセットアップスクリプト
+
+ROS2を使用するには、セットアップスクリプトをsourceする必要がある。
+
+```bash
+# 手動でROS2環境をセットアップ（現在のターミナルのみ）
+source /opt/ros/jazzy/setup.bash
+```
+
+#### 7.4.2 自動読み込み設定
+
+毎回手動でsourceするのは手間なので、.bashrcに追記して自動化する。
+
+```bash
+# .bashrcにROS2セットアップを追加
+echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
+
+# 設定を反映
+source ~/.bashrc
+```
+
+#### 7.4.3 環境変数の確認
+
+```bash
+# ROS2関連の環境変数を確認
+printenv | grep -i ROS
+
+# 期待される出力例
+# ROS_VERSION=2
+# ROS_PYTHON_VERSION=3
+# ROS_DISTRO=jazzy
+```
+
+### 7.5 colconのインストール
+
+colconはROS2のビルドツールである。
+
+```bash
+# colcon関連パッケージのインストール
+sudo apt-get install -y python3-colcon-common-extensions
+```
+
+#### 7.5.1 colcon補完の設定
+
+colconコマンドのタブ補完を有効にする。
+
+```bash
+# colcon補完を.bashrcに追加
+echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> ~/.bashrc
+
+# 設定を反映
+source ~/.bashrc
+```
+
+### 7.6 rosdepのセットアップ
+
+rosdepはROS2パッケージの依存関係を自動解決するツールである。
+
+#### 7.6.1 rosdepの初期化
+
+```bash
+# rosdepの初期化（システム全体で一度だけ実行）
+sudo rosdep init
+```
+
+> **Note**: 既に初期化済みの場合は「already initialized」と表示される。エラーではない。
+
+#### 7.6.2 rosdepデータベースの更新
+
+```bash
+# rosdepデータベースの更新（ユーザーごとに実行）
+rosdep update
+```
+
+### 7.7 ROS2動作確認
+
+ROS2が正しくインストールされたことを確認する。
+
+#### 7.7.1 バージョン確認
+
+```bash
+# ROS2のバージョン確認
+ros2 --version
+
+# 期待される出力例
+# ros2 0.32.0
+```
+
+#### 7.7.2 Talker-Listenerテスト
+
+2つのターミナルを開いて、ROS2のサンプルノードで通信テストを行う。
+
+**ターミナル1（Talker）:**
+```bash
+# Talkerノードを起動（メッセージを送信）
+ros2 run demo_nodes_cpp talker
+```
+
+期待される出力:
+```
+[INFO] [1706000000.000000000] [talker]: Publishing: 'Hello World: 1'
+[INFO] [1706000000.000000000] [talker]: Publishing: 'Hello World: 2'
+...
+```
+
+**ターミナル2（Listener）:**
+```bash
+# Listenerノードを起動（メッセージを受信）
+ros2 run demo_nodes_cpp listener
+```
+
+期待される出力:
+```
+[INFO] [1706000000.000000000] [listener]: I heard: [Hello World: 1]
+[INFO] [1706000000.000000000] [listener]: I heard: [Hello World: 2]
+...
+```
+
+**Ctrl+C** で各ノードを終了する。
+
+#### 7.7.3 トピック一覧の確認
+
+```bash
+# 現在のトピック一覧を表示
+ros2 topic list
+
+# 期待される出力例（ノードが起動していない場合）
+# /parameter_events
+# /rosout
+```
+
+---
+
+## 8. ROS2ワークスペースのセットアップ
+
+### 8.1 追加の開発パッケージ
+
+プロジェクトで必要となる追加パッケージをインストールする。
+
+```bash
+# シリアル通信用（Arduino連携）
+sudo apt-get install -y python3-serial
+
+# その他の開発ツール
+sudo apt-get install -y python3-pytest python3-pytest-cov
+```
+
+### 8.2 ワークスペースの作成
+
+ROS2ワークスペースを作成する。
+
+```bash
+# ワークスペースディレクトリの作成
+mkdir -p ~/ros2_ws/src
+
+# ワークスペースに移動
+cd ~/ros2_ws
+
+# 空のワークスペースをビルド（初期化）
+colcon build
+
+# ワークスペース環境のセットアップ
+source install/setup.bash
+```
+
+#### 8.2.1 ワークスペース環境の自動読み込み
+
+```bash
+# ワークスペースのセットアップを.bashrcに追加
+echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
+
+# 設定を反映
+source ~/.bashrc
+```
+
+### 8.3 プロジェクトのクローン（任意）
+
+GitHubからプロジェクトをクローンする場合:
+
+```bash
+# srcディレクトリに移動
+cd ~/ros2_ws/src
+
+# プロジェクトをクローン
+git clone https://github.com/your-username/zeuscar-ros2-jazzy-basic.git
+
+# ワークスペースに戻ってビルド
+cd ~/ros2_ws
+colcon build --paths src/*
+
+# 環境を更新
+source install/setup.bash
+```
+
+---
+
+## 9. ROS2ネットワーク設定（マルチマシン構成）
+
+ホストPCとRaspberry Pi間でROS2トピックを通信するための設定。
+
+### 9.1 ROS2のネットワーク通信方式
+
+ROS2はDDS（Data Distribution Service）を使用してノード間通信を行う。
+デフォルトでは**同一ネットワーク内のノードは自動的に発見**される。
+
+### 9.2 前提条件
+
+| 要件 | 説明 |
+|------|------|
+| 同一ネットワーク | ホストPCとRaspberry Piが同じLAN内にあること |
+| ファイアウォール | ROS2通信ポート（UDP 7400-7500等）が開いていること |
+| ROS_DOMAIN_ID | 両マシンで同じ値を設定（デフォルトは0） |
+
+### 9.3 ROS_DOMAIN_IDの設定
+
+同じネットワーク内に複数のROS2システムがある場合、DOMAIN_IDで分離できる。
+
+```bash
+# DOMAIN_IDを設定（0〜232の範囲）
+echo "export ROS_DOMAIN_ID=0" >> ~/.bashrc
+source ~/.bashrc
+
+# 確認
+echo $ROS_DOMAIN_ID
+```
+
+> **Important**: ホストPCとRaspberry Piで**同じROS_DOMAIN_ID**を設定すること。
+
+### 9.4 通信確認
+
+**ホストPC（Publisher側）:**
+```bash
+# テスト用にトピックをPublish
+ros2 topic pub /test_topic std_msgs/msg/String "data: 'Hello from Host PC'"
+```
+
+**Raspberry Pi（Subscriber側）:**
+```bash
+# トピックをSubscribe
+ros2 topic echo /test_topic
+```
+
+Raspberry Pi側で「Hello from Host PC」が表示されれば通信成功。
+
+### 9.5 トラブルシューティング: 通信できない場合
+
+#### 9.5.1 ファイアウォールの確認
+
+```bash
+# ファイアウォールの状態確認
+sudo ufw status
+
+# ROS2用ポートを開放（必要な場合）
+sudo ufw allow 7400:7500/udp
+sudo ufw allow 7400:7500/tcp
+```
+
+#### 9.5.2 ネットワークインターフェースの確認
+
+```bash
+# IPアドレスの確認
+hostname -I
+
+# 両マシンから互いにpingで疎通確認
+ping 192.168.x.x
+```
+
+#### 9.5.3 DDS設定の確認
+
+デフォルトのDDS（FastDDS）でマルチキャストが使えない場合、ユニキャストに変更:
+
+```bash
+# FastDDS設定ファイルの作成
+mkdir -p ~/fastdds
+cat << 'EOF' > ~/fastdds/fastdds.xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+    <participant profile_name="participant_profile" is_default_profile="true">
+        <rtps>
+            <builtin>
+                <metatrafficUnicastLocatorList>
+                    <locator/>
+                </metatrafficUnicastLocatorList>
+                <initialPeersList>
+                    <locator>
+                        <udpv4>
+                            <address>192.168.x.x</address>  <!-- 相手のIPアドレス -->
+                        </udpv4>
+                    </locator>
+                </initialPeersList>
+            </builtin>
+        </rtps>
+    </participant>
+</profiles>
+EOF
+
+# 環境変数で設定ファイルを指定
+echo "export FASTRTPS_DEFAULT_PROFILES_FILE=~/fastdds/fastdds.xml" >> ~/.bashrc
+source ~/.bashrc
+```
+
+---
+
+## 10. ZeusCarパッケージの開発
+
+本プロジェクトでは、プロジェクトルートをROS2ワークスペースとして使用する。
+
+### 10.1 プロジェクト構造
+
+```
+zeuscar-ros2-jazzy-basic/         # ROS2ワークスペース
+├── src/                          # パッケージ格納ディレクトリ
+│   └── zeuscar_robot_package/    # ZeusCar制御パッケージ
+├── build/                        # ビルド成果物（自動生成）
+├── install/                      # インストール先（自動生成）
+├── log/                          # ログ（自動生成）
+└── reference/                    # 参照用（COLCON_IGNOREで除外）
+```
+
+### 10.2 COLCON_IGNOREの設定
+
+referenceディレクトリには参照用の同名パッケージが含まれるため、colconから除外する。
+
+```bash
+# referenceディレクトリを除外
+touch reference/COLCON_IGNORE
+```
+
+> **Note**: `COLCON_IGNORE`ファイルが存在するディレクトリは、colconのビルド対象から除外される。
+
+### 10.3 Publisherノードの作成
+
+#### 10.3.1 publisher.pyの作成
+
+`src/zeuscar_robot_package/zeuscar_robot_package/publisher.py`を作成:
+
+```python
+"""
+ZeusCar Publisher Node
+キーボードから入力されたコマンド番号（0-10）をROS2トピックにパブリッシュする
+"""
+
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
+
+# コマンド番号とArduinoコマンド文字列のマッピング
+COMMANDS_MAP = {
+    0:  "FORWARD",       # 前進
+    1:  "BACKWARD",      # 後退
+    2:  "LEFT",          # 左旋回
+    3:  "RIGHT",         # 右旋回
+    4:  "LEFTFORWARD",   # 左前進
+    5:  "RIGHTFORWARD",  # 右前進
+    6:  "LEFTBACKWARD",  # 左後退
+    7:  "RIGHTBACKWARD", # 右後退
+    8:  "TURNLEFT",      # 左回転
+    9:  "TURNRIGHT",     # 右回転
+    10: "STOP"           # 停止
+}
+
+class MinimalPublisher(Node):
+    def __init__(self):
+        super().__init__('minimal_publisher')
+        self.publisher_ = self.create_publisher(String, 'topic', 10)
+        self.get_logger().info('MinimalPublisher node has been started.')
+
+    def publish_command(self, command_str: str):
+        msg = String()
+        msg.data = command_str
+        self.publisher_.publish(msg)
+        self.get_logger().info(f'Publishing command: "{command_str}"')
+
+def main(args=None):
+    rclpy.init(args=args)
+    minimal_publisher = MinimalPublisher()
+    try:
+        while rclpy.ok():
+            rclpy.spin_once(minimal_publisher, timeout_sec=0.1)
+            user_input = input("Enter command number (0=FORWARD, 1=BACKWARD, etc.) or 'exit': ").strip()
+            if user_input.lower() == 'exit':
+                print("Exiting command input loop.")
+                break
+            if user_input.isdigit():
+                cmd_num = int(user_input)
+                if cmd_num in COMMANDS_MAP:
+                    minimal_publisher.publish_command(COMMANDS_MAP[cmd_num])
+                else:
+                    print("Invalid number. Please enter a value between 0 and 10.")
+            else:
+                print("Invalid input. Please enter a number (0-10) or 'exit'.")
+    except KeyboardInterrupt:
+        pass
+    finally:
+        minimal_publisher.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+#### 10.3.2 setup.pyへのエントリポイント追加
+
+`src/zeuscar_robot_package/setup.py`の`entry_points`に`publisher_node`を追加:
+
+```python
+entry_points={
+    'console_scripts': [
+        'publisher_node = zeuscar_robot_package.publisher:main',
+        'subscriber_node = zeuscar_robot_package.subscriber:main',
+    ],
+},
+```
+
+### 10.4 パッケージのビルド
+
+```bash
+# ROS2環境をソース
+source /opt/ros/jazzy/setup.bash
+
+# パッケージをビルド
+colcon build --packages-select zeuscar_robot_package
+
+# ビルド成果物をソース
+source install/setup.bash
+```
+
+期待される出力:
+```
+Starting >>> zeuscar_robot_package
+Finished <<< zeuscar_robot_package [X.XXs]
+
+Summary: 1 package finished [X.XXs]
+```
+
+### 10.5 Publisherノードの実行
+
+```bash
+# ROS2環境とワークスペースをソース
+source /opt/ros/jazzy/setup.bash
+source install/setup.bash
+
+# Publisherノードを実行
+ros2 run zeuscar_robot_package publisher_node
+```
+
+出力例:
+```
+[INFO] [minimal_publisher]: MinimalPublisher node has been started.
+Enter command number (0=FORWARD, 1=BACKWARD, etc.) or 'exit':
+```
+
+コマンドを入力すると、`/topic`トピックにメッセージがパブリッシュされる。
+
+### 10.6 動作確認
+
+別のターミナルでトピックを監視:
+
+```bash
+source /opt/ros/jazzy/setup.bash
+ros2 topic echo /topic
+```
+
+Publisherノードでコマンドを入力すると、echoに表示される:
+```
+data: 'FORWARD'
+---
+data: 'STOP'
+---
+```
+
+---
+
+## 11. 次のステップ
+
+ZeusCarパッケージの開発が完了したら、以下に進む:
+
+1. **Raspberry Piとの通信テスト** - マルチマシンでのトピック通信確認
+2. **Subscriberノードの動作確認** - Raspberry Pi側でコマンドを受信
+3. **Arduino連携** - シリアル通信でモーター制御
 
 ---
 
@@ -926,6 +1634,13 @@ RufusでUEFI専用（GPT）で作成したUSBを、Legacyモードで起動し�
 
 | 日付 | 内容 |
 |------|------|
+| 2026-02-01 | 10. ZeusCarパッケージの開発セクションを追加 |
+| 2026-02-01 | 11. 次のステップセクションを追加 |
+| 2026-02-01 | Publisherノード名を参照プロジェクトに合わせてMinimalPublisherに修正 |
+| 2026-01-31 | 6. 開発環境のセットアップ（Git, Python, C++）を追加 |
+| 2026-01-31 | 7. ROS2 Jazzyのインストール手順を追加 |
+| 2026-01-31 | 8. ROS2ワークスペースのセットアップを追加 |
+| 2026-01-31 | 9. ROS2ネットワーク設定（マルチマシン構成）を追加 |
 | 2026-01-31 | スリープ・画面ブランク・電源管理の詳細設定手順を追加（5.4節） |
 | 2026-01-31 | Wi-Fi省電力無効化の設定手順を追加（5.5節） |
 | 2026-01-30 | スリープ無効化の設定手順を追加 |

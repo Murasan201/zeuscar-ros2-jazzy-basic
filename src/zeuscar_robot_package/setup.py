@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'publisher_node = zeuscar_robot_package.publisher:main',
             'subscriber_node = zeuscar_robot_package.subscriber:main',
         ],
     },

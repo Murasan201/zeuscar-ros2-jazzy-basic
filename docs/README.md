@@ -27,9 +27,10 @@
 | [backlog-raspberry-pi.md](backlog-raspberry-pi.md) | Raspberry Piバックログ | ROS2、パッケージ移行 |
 
 ### 開発記録
-| ドキュメント | 説明 |
-|-------------|------|
-| [journal.md](journal.md) | 開発ジャーナル |
+| ドキュメント | 説明 | 対象 |
+|-------------|------|------|
+| [journal.md](journal.md) | 開発ジャーナル | Raspberry Pi |
+| [journal-host-pc.md](journal-host-pc.md) | 開発ジャーナル | ホストPC |
 
 ---
 
@@ -56,3 +57,4 @@
 | 2026-01-30 | プロジェクトルートにREADME.md追加（英語） |
 | 2026-01-30 | setup-guide-host-pc.md更新（ホストPCスペック情報、USB SSD使用方法） |
 | 2026-01-30 | troubleshooting-host-pc.md新規作成（ホストPC用トラブルシューティング） |
+| 2026-01-31 | journal-host-pc.md新規作成（ホストPC用開発ジャーナル） |
