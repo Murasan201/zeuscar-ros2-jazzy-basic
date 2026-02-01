@@ -315,3 +315,54 @@ ros2 pkg list
 
 ### 5. コミット
 作業完了後、変更をコミットする。
+
+---
+
+## 2026-02-01
+
+### 作業内容
+
+#### ROS2通信テスト - 成功！
+- [x] ホストPCとRaspberry Pi間のROS2通信テストを実施
+- [x] 全コマンドの動作確認完了
+
+**テスト結果:**
+| コマンド | 送信 | Arduino応答 | 動作 |
+|----------|------|-------------|------|
+| FORWARD | ✓ | ✓ | 前進 |
+| BACKWARD | ✓ | ✓ | 後退 |
+| LEFT | ✓ | ✓ | 左移動 |
+| RIGHT | ✓ | ✓ | 右移動 |
+| LEFTFORWARD | ✓ | ✓ | 左前進 |
+| RIGHTFORWARD | ✓ | ✓ | 右前進 |
+| LEFTBACKWARD | ✓ | ✓ | 左後退 |
+| RIGHTBACKWARD | ✓ | ✓ | 右後退 |
+| STOP | ✓ | ✓ | 停止 |
+
+#### ドキュメント更新
+- [x] setup-guide-host-pc.md: ROS2通信テスト手順を追加（セクション6）
+- [x] troubleshooting.md: RUN-001（シリアルポートアクセス権エラー）を追加
+
+#### トラブルシューティング記録
+- [x] RUN-001: シリアルポートのアクセス権エラー（Permission denied）
+  - 原因: ユーザーがdialoutグループに所属していない
+  - 解決: `sudo usermod -a -G dialout $USER` または一時的に `sudo chmod 666 /dev/ttyACM0`
+
+### システム構成（動作確認済み）
+```
+[Host PC]          -- ROS2 topic -->  [Raspberry Pi]      -- Serial -->  [Arduino]
+Publisher                              Subscriber                         Motor Controller
+Ubuntu 24.04                           Ubuntu 24.04                       Uno R3
+ROS2 Jazzy                             ROS2 Jazzy                         raspi-ctrl-v_2_00.ino
+zeuscar_robot_package                  zeuscar_robot_package              SoftPWM
+publisher_node                         subscriber_node                    4-motor control
+```
+
+### 現在の状態
+- **基本的な遠隔操作システムが完成**
+- ホストPC → Raspberry Pi → Arduino の通信経路が確立
+- 全11種類のコマンド（FORWARD〜STOPおよび斜め移動・旋回）が動作確認済み
+
+### 次のタスク
+- [ ] dialoutグループ設定の永続化（再ログイン）
+- [ ] バックログ3: 統合テスト項目の正式完了確認

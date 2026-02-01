@@ -1630,10 +1630,127 @@ RufusでUEFI専用（GPT）で作成したUSBを、Legacyモードで起動し�
 
 ---
 
+## 6. ROS2通信テスト
+
+ホストPCとRaspberry Pi間でROS2通信が正常に動作するかテストする。
+
+### 6.1 前提条件
+
+- ホストPCとRaspberry Piが同一ネットワークに接続されていること
+- 両方でROS2 Jazzyがインストール済みであること
+- Raspberry PiにArduinoが接続されていること（/dev/ttyACM0）
+
+### 6.2 Raspberry Pi側の準備
+
+Raspberry Piでターミナルを開き、以下を実行:
+
+```bash
+# ワークスペースに移動
+cd ~/work/zeuscar-ros2-jazzy-basic
+
+# 環境のセットアップ
+source /opt/ros/jazzy/setup.bash
+source install/setup.bash
+
+# Subscriberノードを起動
+ros2 run zeuscar_robot_package subscriber_node
+```
+
+期待される出力:
+```
+[INFO] [minimal_subscriber]: Serial connection established on /dev/ttyACM0 at 9600 bps.
+```
+
+### 6.3 ホストPC側からの送信
+
+ホストPCでターミナルを開き、Publisherノードを実行:
+
+```bash
+# ROS2環境のセットアップ
+source /opt/ros/jazzy/setup.bash
+source ~/ros2_ws/install/setup.bash  # ワークスペースのパスは環境に合わせる
+
+# Publisherノードを起動
+ros2 run zeuscar_robot_package publisher_node
+```
+
+または、`ros2 topic pub`コマンドで直接テスト:
+
+```bash
+# FORWARD コマンドを送信
+ros2 topic pub --once /topic std_msgs/msg/String "{data: 'FORWARD'}"
+
+# STOP コマンドを送信
+ros2 topic pub --once /topic std_msgs/msg/String "{data: 'STOP'}"
+```
+
+### 6.4 動作確認
+
+1. **Raspberry Pi側のログを確認**
+   ```
+   [INFO] [minimal_subscriber]: I heard: 'FORWARD'
+   [INFO] [minimal_subscriber]: Sent to Arduino: FORWARD
+   ```
+
+2. **Arduinoの動作を確認**
+   - モーターが指定した方向に動作すること
+
+### 6.5 コマンド一覧
+
+| 番号 | コマンド | 動作 |
+|------|----------|------|
+| 0 | FORWARD | 前進 |
+| 1 | BACKWARD | 後退 |
+| 2 | LEFT | 左移動 |
+| 3 | RIGHT | 右移動 |
+| 4 | LEFTFORWARD | 左前進 |
+| 5 | RIGHTFORWARD | 右前進 |
+| 6 | LEFTBACKWARD | 左後退 |
+| 7 | RIGHTBACKWARD | 右後退 |
+| 8 | TURNLEFT | 左旋回 |
+| 9 | TURNRIGHT | 右旋回 |
+| 10 | STOP | 停止 |
+
+### 6.6 トラブルシューティング
+
+#### ROS2通信ができない場合
+
+```bash
+# ROS_DOMAIN_IDを確認（両方で同じ値にする）
+echo $ROS_DOMAIN_ID
+
+# 設定されていない場合は同じ値を設定
+export ROS_DOMAIN_ID=0
+```
+
+#### トピックが見つからない場合
+
+```bash
+# トピック一覧を確認
+ros2 topic list
+
+# トピックの詳細を確認
+ros2 topic info /topic
+```
+
+#### シリアルポートエラーの場合
+
+```bash
+# Arduinoのポートを確認
+ls -la /dev/ttyACM*
+
+# シリアルポートのアクセス権を確認
+sudo usermod -a -G dialout $USER
+# 再ログインが必要
+```
+
+---
+
 ## 変更履歴
 
 | 日付 | 内容 |
 |------|------|
+| 2026-02-01 | ROS2通信テスト手順を追加（12節） |
 | 2026-02-01 | 10. ZeusCarパッケージの開発セクションを追加 |
 | 2026-02-01 | 11. 次のステップセクションを追加 |
 | 2026-02-01 | Publisherノード名を参照プロジェクトに合わせてMinimalPublisherに修正 |

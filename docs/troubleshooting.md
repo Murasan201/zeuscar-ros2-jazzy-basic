@@ -176,7 +176,55 @@ touch reference/COLCON_IGNORE
 
 ## 実行時エラー
 
-（エラー発生時に記載）
+### RUN-001: シリアルポートのアクセス権エラー（Permission denied）
+
+#### 発生日時
+2026-02-01
+
+#### エラー内容
+```
+[ERROR] [minimal_subscriber]: Failed to open serial port: [Errno 13] could not open port /dev/ttyACM0: [Errno 13] Permission denied: '/dev/ttyACM0'
+```
+
+#### 発生状況
+ROS2のSubscriberノードを起動してArduinoとシリアル通信しようとした際に発生。
+```bash
+ros2 run zeuscar_robot_package subscriber_node
+```
+
+#### 原因
+ユーザーが`dialout`グループに所属していないため、シリアルポート（/dev/ttyACM0）へのアクセス権がない。
+
+#### 解決方法
+
+**方法1: dialoutグループに追加（推奨）**
+```bash
+# dialoutグループに追加
+sudo usermod -a -G dialout $USER
+
+# 反映するには再ログインが必要
+# または、現在のセッションで一時的に反映
+newgrp dialout
+```
+
+**方法2: デバイスファイルのパーミッションを変更（一時的）**
+```bash
+# 一時的にアクセス権を付与（再起動で元に戻る）
+sudo chmod 666 /dev/ttyACM0
+```
+
+#### グループ確認方法
+```bash
+# 現在所属しているグループを確認
+groups $USER
+
+# dialoutが含まれていれば問題なし
+# 例: pi4 : pi4 adm dialout cdrom sudo ...
+```
+
+#### 参考情報
+- Linuxではシリアルデバイスへのアクセスにdialoutグループへの所属が必要
+- 再ログインせずに反映するには`newgrp dialout`を使用
 
 ---
 
@@ -277,3 +325,4 @@ YYYY-MM-DD
 | 2026-01-28 | ENV-002: dpkgロックエラー（unattended-upgrades）を追加 |
 | 2026-01-29 | BUILD-001: colconで重複パッケージ名エラーを追加 |
 | 2026-01-30 | HW-001: BIOS/Legacy Boot of UEFI-only mediaエラーを追加 |
+| 2026-02-01 | RUN-001: シリアルポートのアクセス権エラーを追加 |
